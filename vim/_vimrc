@@ -1,0 +1,236 @@
+" Vim with all enhancements
+source $VIMRUNTIME/vimrc_example.vim
+
+" Use the internal diff if available.
+" Otherwise use the special 'diffexpr' for Windows.
+if &diffopt !~# 'internal'
+  set diffexpr=MyDiff()
+endif
+function MyDiff()
+  let opt = '-a --binary '
+  if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+  if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+  let arg1 = v:fname_in
+  if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+  let arg1 = substitute(arg1, '!', '\!', 'g')
+  let arg2 = v:fname_new
+  if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+  let arg2 = substitute(arg2, '!', '\!', 'g')
+  let arg3 = v:fname_out
+  if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+  let arg3 = substitute(arg3, '!', '\!', 'g')
+  if $VIMRUNTIME =~ ' '
+    if &sh =~ '\<cmd'
+      if empty(&shellxquote)
+        let l:shxq_sav = ''
+        set shellxquote&
+      endif
+      let cmd = '"' . $VIMRUNTIME . '\diff"'
+    else
+      let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+    endif
+  else
+    let cmd = $VIMRUNTIME . '\diff'
+  endif
+  let cmd = substitute(cmd, '!', '\!', 'g')
+  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
+  if exists('l:shxq_sav')
+    let &shellxquote=l:shxq_sav
+  endif
+endfunction
+
+"Personal Settings. More to be added soon
+execute pathogen#infect()
+filetype plugin indent on
+syntax on
+
+"set full screen 
+au GUIEnter * simalt ~x
+"gruvbox theme
+set termguicolors
+set background=dark
+colorscheme gruvbox-material
+let g:gruv_material_background ='hard'
+
+"highlight
+autocmd CursorHold * silent call CocActionAsync('highlight')
+set guifont=Consolas:h12 "Set font - height
+" set row number
+set number 
+set relativenumber
+
+"Folded
+set foldenable
+set foldlevelstart=10
+set foldmethod=syntax
+"backup file
+set backup
+set backupdir=$HOME\vim\backup
+set directory=$HOME\vim\tmp
+set undodir=/tmp// 
+" Enable hidden buffers
+set hidden
+
+"" Set working directory
+nnoremap <leader>. :lcd %:p:h<CR>
+
+"menus
+set guioptions-=m
+set guioptions-=T
+set guioptions-=r
+set guioptions-=L
+
+"" Tabs and spaces 
+set tabstop=4
+set softtabstop=0
+set shiftwidth=4
+set expandtab "tab are space
+
+"seraching
+set ignorecase " ignore case when search
+set hlsearch    " highligh matches
+set incsearch " search as characters enterd
+set smartcase
+
+"Mapping
+let mapleader=','
+" my map
+inoremap jk <esc>
+noremap <leader>w :w<cr>
+nnoremap <leader>vim :edit $VIM\_vimrc<cr>
+
+" Split
+noremap <Leader>hs :<C-u>split<CR>
+noremap <Leader>vs :<C-u>vsplit<CR>
+"" Tabs
+nnoremap <Tab> gt
+nnoremap <S-Tab> gT
+nnoremap <silent> <S-t> :tabnew<CR>
+
+"" Clean search (highlight)
+nnoremap <silent> <leader><space> :noh<cr>
+
+"UI config
+set showcmd
+let no_buffers_menu=1
+set showmatch " highlight (), []
+set cursorline
+set wildmenu "display all matching files when we tab comlete"
+set ruler
+set vb
+set viminfo+=n$VIM/_viminfo
+set noerrorbells
+set history=1000
+set undolevels=1000
+
+"mouse
+if has('mouse')
+    set mouse=a 
+endif
+" Indent guides
+set autoindent
+
+"COC
+autocmd FileType json syntax match Comment +\/\/.\+$+
+nnoremap <silent> <space>e  :<C-u>CocList extensions<cr>
+"airline vim
+let g:airline#extensions#tabline#enabled=1
+let g:airline#extensions#tabline#left_sep=" "
+let g:airline#extensions#tabline#left_alt_sep="|"
+let g:airline#extensions#tabline#formatter = 'unique_tail'
+
+" Encoding
+set encoding=utf-8
+set fileencoding=utf-8 
+set fileencodings=utf-8
+set ttyfast
+
+"Git
+let g:gitgutter_git_excutable = 'C:\Program Files\Git\bin\git.exe'
+let g:gitgutter_diff_relative_to = 'working_tree'
+"statusline git
+function! GitStatus()
+  let [a,m,r] = GitGutterGetHunkSummary()
+  return printf('+%d ~%d -%d', a, m, r)
+endfunction
+set statusline+=%{GitStatus()}
+
+"language
+"Html
+let g:user_emmet_leader_key=','
+" javascript
+let g:javascript_enable_domhtmlcss = 1
+let g:user_emmet_install_global = 0
+autocmd FileType html,css EmmetInstall
+"NERDtree
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | exe 'cd '.argv()[0] | endif
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+let g:NERDTreeDirArrowExpandable = '▸'
+let g:NERDTreeDirArrowCollapsible = '▾'
+let g:NERDTreeChDirMode=2
+let g:NERDTreeIgnore=['\.rbc$', '\~$', '\.pyc$', '\.db$', '\.sqlite$', '__pycache__']
+let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
+let g:NERDTreeShowBookmarks=1
+let g:nerdtree_tabs_focus_on_files=1
+let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
+let g:NERDTreeWinSize = 50
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.pyc,*.db,*.sqlite
+nnoremap <silent> <F3> :NERDTreeToggle<CR>
+nnoremap <leader>b :OpenBookmark 
+nnoremap <silent> <F2> :Bookmark 
+
+
+"coc-snippet
+nnoremap <leader>snip :CocCommand snippets.editSnippets<cr>
+" Use <C-l> for trigger snippet expand.
+imap <C-l> <Plug>(coc-snippets-expand)
+" Use <C-j> for select text for visual placeholder of snippet.
+vmap <C-j> <Plug>(coc-snippets-select)
+" Use <C-j> for jump to next placeholder, it's default of coc.nvim
+let g:coc_snippet_next = '<c-j>'
+" Use <C-k> for jump to previous placeholder, it's default of coc.nvim
+let g:coc_snippet_prev = '<c-k>'
+" Use <C-j> for both expand and jump (make expand higher priority.)
+imap <C-j> <Plug>(coc-snippets-expand-jump)
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? coc#_select_confirm() :
+      \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+let g:coc_snippet_next = '<tab>'
+
+
+vmap <leader>f <Plug>(coc-format-selected)
+nmap <leader>f <Plug>(coc-format-selected)
+"NERDcommenter
+"Map key
+" Add spaces after comment delimiters by default
+let g:NERDSpaceDelims = 1
+" Use compact syntax for prettified multi-line comments
+let g:NERDCompactSexyComs = 1
+" Align line-wise comment delimiters flush left instead of following code indentation
+let g:NERDDefaultAlign = 'left'
+" Set a language to use its alternate delimiters by default
+let g:NERDAltDelims_java = 1
+" Add your own custom formats or override the defaults
+let g:NERDCustomDelimiters = { 'c': { 'left': '/**','right': '*/' } }
+" Allow commenting and inverting empty lines (useful when commenting a region)
+let g:NERDCommentEmptyLines = 1
+" Enable trimming of trailing whitespace when uncommenting
+let g:NERDTrimTrailingWhitespace = 1
+" Enable NERDCommenterToggle to check all selected lines is commented or not 
+let g:NERDToggleCheckAllLines = 1
+
+"java Config
+" Easy compile java in vim
+autocmd FileType java set makeprg=javac\ %
+set errorformat=%A%f:%l:\ %m,%-Z%p^,%-C.%#
+map <F9> :make<Return>:copen<Return>
+map <F10> :cprevious<Return>
+map <F11> :cnext<Return>
